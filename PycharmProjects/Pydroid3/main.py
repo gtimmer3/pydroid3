@@ -1,53 +1,71 @@
-from turtle import Screen
-from snake import Snake
-from food import Food
-from scoreboard import Scoreboard
+import turtle
+import random
 import time
+rl = ["right", "left"]
+# Function to create a ball and set its properties
+def create_ball(color):
+    ball = turtle.Turtle()
+    ball.shape("circle")
+    ball.color(color)
+    ball.speed(0)
+    return ball
+# Ask the user for a run time
+el_time = int(input("How many seconds would you like the simulation to run for? "))
+# Create a list of colors to use for the balls
+colors = ["red", "orange","purple", "darkblue"]
 
-screen = Screen()
-screen.setup(width=600, height=600)
-screen.bgcolor("black")
-screen.title("My Snake Game")
-screen.tracer(0)
+# Create a list to hold the ball turtles
+balls = []
 
-snake = Snake()
-food = Food()
-scoreboard = Scoreboard()
+# Create the balls and add them to the list
+for color in colors:
+    balls.append(create_ball(color))
 
-screen.listen()
-screen.onkey(snake.up, "Up")
-screen.onkey(snake.down, "Down")
-screen.onkey(snake.left, "Left")
-screen.onkey(snake.right, "Right")
-
-game_is_on = True
-while game_is_on:
-    screen.update()
-    time.sleep(0.05)
-    snake.move()
-
-
-    #Detect collision with food.
-    if snake.head.distance(food) < 15:
-        food.refresh()
-        snake.extend()
-        scoreboard.increase_score()
-
-    #Detect collision with wall.
-    if snake.head.xcor() > 280 or snake.head.xcor() < -280 or snake.head.ycor() > 280 or snake.head.ycor() < -280:
-        game_is_on = False
-        scoreboard.reset_scoreboard()
-
-    #Detect collision with tail.
-    for segment in snake.segments:
-        if segment == snake.head:
-            pass
-        elif snake.head.distance(segment) < 10:
-            game_is_on = False
-            scoreboard.reset_scoreboard()
+# Define the movement of each ball
+for ball in balls:
+    ball.penup()
+    ball.goto(random.randint(-300, 300), random.randint(-300, 300))
+    ball.pendown()
+    ball.setheading(random.randint(0, 360))
 
 
 
+# Start the timer
+start_time = time.time()
+
+# Run the simulation for the user-specified amount of time
+turtle.clear()
+turtle.bgcolor("white")
+turtle.tracer(0,0)
+while True:
+    for ball in balls:
+        ball.forward(5)
+        ball.right(0.5)
+
+        # Check for collision with the walls
+        if ball.xcor() > 300:
+            ball.goto(300, ball.ycor())
+            ball.setheading(random.randint(1, 179))
+        elif ball.xcor() < -300:
+            ball.goto(-300, ball.ycor())
+            ball.setheading(random.randint(181, 359))
+        if ball.ycor() > 300:
+            ball.goto(ball.xcor(), 300)
+            ball.setheading(random.randint(89,269))
+        elif ball.ycor() < -300:
+            ball.goto(ball.xcor(), -300)
+            ball.setheading(random.randint(0, 89))
+
+        # Check for collision with other balls
+        for other_ball in balls:
+            if other_ball != ball and abs(ball.distance(other_ball)) < 30:
+                ball.setheading((ball.heading()+random.randrange(135,225)))
+                other_ball.setheading((ball.heading()+random.randrange(135,225)))
 
 
-screen.exitonclick()
+
+    turtle.update()
+    # Check if the specified amount of time has elapsed
+    if time.time() - start_time > el_time:
+        turtle.done()
+        break
